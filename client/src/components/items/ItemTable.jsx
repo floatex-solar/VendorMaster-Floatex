@@ -405,7 +405,10 @@ export default function ItemTable({ onEdit }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmIndividualDelete}>
+            <AlertDialogAction
+              onClick={confirmIndividualDelete}
+              className="bg-red-600 hover:bg-red-700 text-white hover:text-white"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -427,7 +430,10 @@ export default function ItemTable({ onEdit }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmBulkDelete}>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              className="bg-red-600 hover:bg-red-700 text-white hover:text-white"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

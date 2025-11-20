@@ -342,7 +342,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     <Label>Name *</Label>
                     <Input
                       {...register("vendor.name")}
-                      disabled={updateVendor.isLoading}
+                      disabled={updateVendor.isPending}
                     />
                     {errors.vendor?.name && (
                       <p className="text-sm text-red-500">
@@ -354,7 +354,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     <Label>Phone *</Label>
                     <Input
                       {...register("vendor.phone")}
-                      disabled={updateVendor.isLoading}
+                      disabled={updateVendor.isPending}
                     />
                     {errors.vendor?.phone && (
                       <p className="text-sm text-red-500">
@@ -366,14 +366,14 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     <Label>Email</Label>
                     <Input
                       {...register("vendor.email")}
-                      disabled={updateVendor.isLoading}
+                      disabled={updateVendor.isPending}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>GST</Label>
                     <Input
                       {...register("vendor.gst")}
-                      disabled={updateVendor.isLoading}
+                      disabled={updateVendor.isPending}
                     />
                   </div>
 
@@ -381,7 +381,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     <Label>Address *</Label>
                     <Input
                       {...register("vendor.address")}
-                      disabled={updateVendor.isLoading}
+                      disabled={updateVendor.isPending}
                     />
                     {errors.vendor?.address && (
                       <p className="text-sm text-red-500">
@@ -404,7 +404,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                       placeholder="Select state..."
                       isClearable
                       styles={customSelectStyles}
-                      isDisabled={updateVendor.isLoading}
+                      isDisabled={updateVendor.isPending}
                     />
                     {errors.vendor?.state && (
                       <p className="text-sm text-red-500">
@@ -427,7 +427,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         watchedState ? "Select city..." : "Select state first"
                       }
                       isClearable
-                      isDisabled={!watchedState || updateVendor.isLoading}
+                      isDisabled={!watchedState || updateVendor.isPending}
                       styles={customSelectStyles}
                     />
                     {errors.vendor?.city && (
@@ -441,7 +441,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     <Label>Pin Code *</Label>
                     <Input
                       {...register("vendor.pinCode")}
-                      disabled={updateVendor.isLoading}
+                      disabled={updateVendor.isPending}
                     />
                     {errors.vendor?.pinCode && (
                       <p className="text-sm text-red-500">
@@ -455,7 +455,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                   <Switch
                     checked={watch("vendor.active")}
                     onCheckedChange={(v) => setValue("vendor.active", v)}
-                    disabled={updateVendor.isLoading}
+                    disabled={updateVendor.isPending}
                   />
                 </div> */}
                 </div>
@@ -472,7 +472,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     variant="outline"
                     size="sm"
                     onClick={addContact}
-                    disabled={updateVendor.isLoading}
+                    disabled={updateVendor.isPending}
                   >
                     <Plus className="h-4 w-4 mr-1" /> Add Contact
                   </Button>
@@ -511,7 +511,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`contacts.${idx}.name`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`contacts.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Name"
@@ -522,7 +522,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`contacts.${idx}.designation`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`contacts.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Designaiton"
@@ -533,7 +533,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`contacts.${idx}.phone`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`contacts.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Phone"
@@ -545,7 +545,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`contacts.${idx}.email`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`contacts.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Email"
@@ -556,7 +556,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`contacts.${idx}.info`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`contacts.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Info"
@@ -574,7 +574,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                             }
                             size="sm"
                             onClick={() => toggleContactDelete(idx)}
-                            disabled={updateVendor.isLoading}
+                            disabled={updateVendor.isPending}
                             className="w-full sm:w-fit"
                           >
                             {watch(`contacts.${idx}._action`) === "delete" ? (
@@ -593,7 +593,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                             variant="destructive"
                             size="sm"
                             onClick={() => removeContact(idx)}
-                            disabled={updateVendor.isLoading}
+                            disabled={updateVendor.isPending}
                             className="w-full sm:w-fit"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -618,7 +618,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     variant="outline"
                     size="sm"
                     onClick={addMapping}
-                    disabled={updateVendor.isLoading}
+                    disabled={updateVendor.isPending}
                   >
                     <Plus className="h-4 w-4 mr-1" /> Add Item
                   </Button>
@@ -663,7 +663,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                           placeholder="Search: Category • Sub • Description • UOM"
                           isClearable
                           isDisabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`mappings.${idx}._action`) === "delete"
                           }
                           styles={customSelectStyles}
@@ -675,7 +675,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`mappings.${idx}.price`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`mappings.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Price"
@@ -721,7 +721,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`mappings.${idx}.leadTimeDays`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`mappings.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Lead Time"
@@ -733,7 +733,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         <Input
                           {...register(`mappings.${idx}.notes`)}
                           disabled={
-                            updateVendor.isLoading ||
+                            updateVendor.isPending ||
                             watch(`mappings.${idx}._action`) === "delete"
                           }
                           placeholder="Enter Notes"
@@ -751,7 +751,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                             }
                             size="sm"
                             onClick={() => toggleMappingDelete(idx)}
-                            disabled={updateVendor.isLoading}
+                            disabled={updateVendor.isPending}
                             className="w-full sm:w-fit"
                           >
                             {watch(`mappings.${idx}._action`) === "delete" ? (
@@ -770,7 +770,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                             variant="destructive"
                             size="sm"
                             onClick={() => removeMapping(idx)}
-                            disabled={updateVendor.isLoading}
+                            disabled={updateVendor.isPending}
                             className="w-full sm:w-fit"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -789,15 +789,15 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                disabled={updateVendor.isLoading}
+                disabled={updateVendor.isPending}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={updateVendor.isLoading}>
-                {updateVendor.isLoading && (
+              <Button type="submit" disabled={updateVendor.isPending}>
+                {updateVendor.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {updateVendor.isLoading ? "Updating..." : "Update Vendor"}
+                {updateVendor.isPending ? "Updating..." : "Update Vendor"}
               </Button>
             </div>
           </form>

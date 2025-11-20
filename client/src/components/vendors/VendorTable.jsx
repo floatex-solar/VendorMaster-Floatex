@@ -24,6 +24,16 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useItems } from "../../hooks/useItems";
 import { useCategories, useSubCategories } from "../../hooks/useCategories";
 import { cx } from "class-variance-authority";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const customSelectStyles = {
   menuPortal: (base) => ({ ...base, zIndex: 9999 }),
@@ -378,46 +388,52 @@ export default function VendorTable({ onEdit }) {
       {/* Delete dialogs: you already had AlertDialog components in your codebase; replace these with your existing dialog components if desired. */}
       {/* For brevity we keep simple window confirm here; adapt to your AlertDialog UI if you want prettier modals. */}
 
-      {/* Inline confirm prompts for demo */}
-      {deleteDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded shadow">
-            <div className="mb-4">
+      {/* Individual Delete AlertDialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
               Delete vendor {vendorToDelete?.vendorId} — {vendorToDelete?.name}?
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setDeleteDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={confirmIndividualDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmIndividualDelete}
+              className="bg-red-600 hover:bg-red-700 text-white hover:text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      {bulkDeleteDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded shadow">
-            <div className="mb-4">Delete {selected.size} selected vendors?</div>
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setBulkDeleteDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={confirmBulkDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Bulk Delete AlertDialog */}
+      <AlertDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete {selected.size} selected vendors? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              className="bg-red-600 hover:bg-red-700 text-white hover:text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
