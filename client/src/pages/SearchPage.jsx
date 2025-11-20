@@ -158,7 +158,7 @@ export default function SearchPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-[5fr_2fr_2fr_min-content_min-content] gap-2 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-[5fr_2fr_2fr_min-content_min-content] gap-2 mb-6">
         <div className="flex-1 relative flex items-center">
           <SearchIcon
             className="absolute ml-3 text-muted-foreground"
