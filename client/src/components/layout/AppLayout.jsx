@@ -1,7 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { TopBar } from "@/components/TopBar";
+import { TopBar } from "../Topbar";
 // import { useAuthStore } from "@/store/authStore";
 
 const AppLayout = () => {
