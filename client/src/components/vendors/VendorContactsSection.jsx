@@ -56,12 +56,8 @@ export default function VendorContactsSection({
               Name <span className="text-red-500">*</span>
             </p>
             <p className="pl-2">Designation</p>
-            <p className="pl-2">
-              Phone <span className="text-red-500">*</span>
-            </p>
-            <p className="pl-2">
-              Email <span className="text-red-500">*</span>
-            </p>
+            <p className="pl-2">Phone</p>
+            <p className="pl-2">Email</p>
             <p className="pl-2">Info</p>
             <p className="pl-2 hidden sm:block text-right"></p>
           </div>
@@ -105,9 +101,7 @@ export default function VendorContactsSection({
               </div>
 
               <div className="space-y-2">
-                <Label className="sm:hidden">
-                  Phone <span className="text-red-500">*</span>
-                </Label>
+                <Label className="sm:hidden">Phone</Label>
                 <Input
                   {...register(
                     `vendors.${vendorIndex}.contacts.${contactIndex}.phone`
@@ -118,9 +112,7 @@ export default function VendorContactsSection({
               </div>
 
               <div className="space-y-2">
-                <Label className="sm:hidden">
-                  Email <span className="text-red-500">*</span>
-                </Label>
+                <Label className="sm:hidden">Email</Label>
                 <Input
                   {...register(
                     `vendors.${vendorIndex}.contacts.${contactIndex}.email`

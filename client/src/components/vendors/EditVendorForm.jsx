@@ -351,7 +351,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label>Phone *</Label>
+                    <Label>Phone </Label>
                     <Input
                       {...register("vendor.phone")}
                       disabled={updateVendor.isPending}
@@ -378,7 +378,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
-                    <Label>Address *</Label>
+                    <Label>Address </Label>
                     <Input
                       {...register("vendor.address")}
                       disabled={updateVendor.isPending}
@@ -391,7 +391,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>State *</Label>
+                    <Label>State </Label>
                     <Select
                       options={stateOptions}
                       value={stateOptions.find(
@@ -414,7 +414,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>City *</Label>
+                    <Label>City </Label>
                     <Select
                       options={cityOptions}
                       value={cityOptions.find(
@@ -438,7 +438,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Pin Code *</Label>
+                    <Label>Pin Code </Label>
                     <Input
                       {...register("vendor.pinCode")}
                       disabled={updateVendor.isPending}
@@ -529,7 +529,7 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                         />
                       </div>
                       <div>
-                        <Label className="sm:hidden">Phone *</Label>
+                        <Label className="sm:hidden">Phone </Label>
                         <Input
                           {...register(`contacts.${idx}.phone`)}
                           disabled={

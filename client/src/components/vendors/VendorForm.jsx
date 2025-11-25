@@ -35,21 +35,21 @@ const { getCitiesOfState } = City;
 
 const vendorSchema = z.object({
   name: z.string().min(1, "Name required"),
-  address: z.string().min(1, "Address required"),
-  state: z.string().min(1, "State required"),
-  city: z.string().min(1, "City required"),
-  pinCode: z.string().min(1, "Pin Code required"),
+  address: z.string().optional(),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  pinCode: z.string().optional(),
   gst: z.string().optional(),
-  phone: z.string().min(1, "Phone required"),
-  email: z.string().email("Invalid email").optional(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
   active: z.boolean().default(true),
 });
 
 const contactSchema = z.object({
   name: z.string().min(1, "Contact name required"),
   designation: z.string().optional(),
-  phone: z.string().min(1, "Phone required"),
-  email: z.string().email("Invalid email"),
+  phone: z.string().optional(),
+  email: z.string().optional(),
   info: z.string().optional(),
 });
 
@@ -337,10 +337,7 @@ export default function VendorForm({ open, onOpenChange }) {
                                   )}
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>
-                                    Phone{" "}
-                                    <span className="text-red-500">*</span>
-                                  </Label>
+                                  <Label>Phone</Label>
                                   <Input
                                     {...register(
                                       `vendors.${vendorIndex}.vendor.phone`
@@ -382,10 +379,7 @@ export default function VendorForm({ open, onOpenChange }) {
                                   />
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
-                                  <Label>
-                                    Address{" "}
-                                    <span className="text-red-500">*</span>
-                                  </Label>
+                                  <Label>Address</Label>
                                   <Input
                                     {...register(
                                       `vendors.${vendorIndex}.vendor.address`
@@ -402,10 +396,7 @@ export default function VendorForm({ open, onOpenChange }) {
                                   )}
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>
-                                    State{" "}
-                                    <span className="text-red-500">*</span>
-                                  </Label>
+                                  <Label>State</Label>
                                   <Select
                                     options={stateOptions}
                                     value={stateOptions.find(
@@ -443,9 +434,7 @@ export default function VendorForm({ open, onOpenChange }) {
                                   )}
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>
-                                    City <span className="text-red-500">*</span>
-                                  </Label>
+                                  <Label>City</Label>
                                   <Select
                                     options={getCityOptions(vendorIndex)}
                                     value={getCityOptions(vendorIndex).find(
@@ -489,10 +478,7 @@ export default function VendorForm({ open, onOpenChange }) {
                                   )}
                                 </div>
                                 <div className="space-y-2">
-                                  <Label>
-                                    Pin Code{" "}
-                                    <span className="text-red-500">*</span>
-                                  </Label>
+                                  <Label>Pin Code</Label>
                                   <Input
                                     {...register(
                                       `vendors.${vendorIndex}.vendor.pinCode`

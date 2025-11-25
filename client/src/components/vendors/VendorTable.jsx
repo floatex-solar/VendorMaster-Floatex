@@ -468,7 +468,7 @@ function ExpandedVendorDetails({ vendorId }) {
           <div className="text-sm text-muted-foreground bg-gray-50 p-1">
             Address
           </div>
-          <div className="p-1">{vendor.address || "-"}</div>
+          <div className="p-1 text-wrap">{vendor.address || "-"}</div>
         </div>
         {/* <div>
           <div className="text-sm text-muted-foreground">Active</div>
