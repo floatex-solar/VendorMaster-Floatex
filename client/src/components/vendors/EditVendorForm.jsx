@@ -316,8 +316,8 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
     const itemId = option ? option.value : "";
     setValue(`mappings.${index}.itemId`, itemId);
     // set uom hidden field from item master if available
-    const item = items.find((it) => it.itemId === itemId);
-    setValue(`mappings.${index}.uom`, item ? item.uomId || "" : "");
+    // const item = items.find((it) => it.itemId === itemId);
+    // setValue(`mappings.${index}.uom`, item ? item.uomId || "" : "");
   };
 
   return (
@@ -473,8 +473,9 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     size="sm"
                     onClick={addContact}
                     disabled={updateVendor.isPending}
+                    className="bg-gray-600 hover:bg-gray-700 text-white hover:text-white"
                   >
-                    <Plus className="h-4 w-4 mr-1" /> Add Contact
+                    <Plus className="h-4 w-4 mr-1" /> Add
                   </Button>
                 </div>
               </CardHeader>
@@ -619,8 +620,9 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                     size="sm"
                     onClick={addMapping}
                     disabled={updateVendor.isPending}
+                    className="bg-gray-600 hover:bg-gray-700 text-white hover:text-white"
                   >
-                    <Plus className="h-4 w-4 mr-1" /> Add Item
+                    <Plus className="h-4 w-4 mr-1" /> Add
                   </Button>
                 </div>
               </CardHeader>
