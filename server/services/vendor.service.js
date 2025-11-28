@@ -285,10 +285,10 @@ export async function addMapping(vendorId, map) {
       id,
       vendorId,
       map.itemId,
-      map.price ?? "",
-      map.uom ?? "",
-      map.leadTimeDays ?? "",
-      map.notes ?? "",
+      map.price ?? "-",
+      map.uom ?? "-",
+      map.leadTimeDays ?? "-",
+      map.notes ?? "-",
       "true",
     ],
   ]);
@@ -334,11 +334,11 @@ export async function updateMapping(mappingId, updates) {
   const updated = [
     mappingId,
     row[1],
-    updates.itemId ?? row[2],
-    updates.price ?? row[3],
-    updates.uom ?? row[4],
-    updates.leadTimeDays ?? row[5],
-    updates.notes ?? row[6],
+    updates.itemId ?? row[2] ?? "-",
+    updates.price ?? row[3] ?? "-",
+    updates.uom ?? row[4] ?? "-",
+    updates.leadTimeDays ?? row[5] ?? "-",
+    updates.notes ?? row[6] ?? "-",
     updates.active !== undefined ? String(updates.active) : row[7],
   ];
 

@@ -156,7 +156,7 @@ export default function VendorMappingsSection({
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2">
                 <Label className="sm:hidden">Notes</Label>
                 <Input
                   {...register(

@@ -90,3 +90,34 @@ export async function remove(req, res, next) {
     next(err);
   }
 }
+
+export async function bulkUpdateVendorMappings(itemId, mappings) {
+  if (!Array.isArray(mappings)) return;
+
+  for (const m of mappings) {
+    if (m._action === "add") {
+      await vendorService.addMapping(m.vendorId, {
+        itemId,
+        price: m.price,
+        uom: m.uom,
+        leadTimeDays: m.leadTimeDays,
+        notes: m.notes,
+      });
+    }
+
+    if (m._action === "update") {
+      await vendorService.updateMapping(m.mappingId, {
+        price: m.price,
+        uom: m.uom,
+        leadTimeDays: m.leadTimeDays,
+        notes: m.notes,
+      });
+    }
+
+    if (m._action === "delete") {
+      await vendorService.deleteMapping(m.mappingId);
+    }
+  }
+
+  return true;
+}

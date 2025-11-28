@@ -23,14 +23,12 @@ export default function ItemsPage() {
           </Button>
         </div>
       </div>
-
       <ItemTable
         onEdit={(item) => {
           setSelectedItem(item);
           setEditOpen(true);
         }}
       />
-
       <ItemForm open={open} onOpenChange={setOpen} />
       <EditItemForm open={editOpen} setOpen={setEditOpen} item={selectedItem} />
     </div>

@@ -1,5 +1,6 @@
 // Backend: src/controller/items.controller.js (updated)
 import * as itemService from "../services/items.service.js";
+import * as vendorCtrl from "../controller/vendor.controller.js";
 
 export async function list(req, res, next) {
   try {
@@ -49,6 +50,27 @@ export async function bulkRemove(req, res, next) {
     const { ids } = req.body;
     console.log("I was called");
     await itemService.bulkDelete(ids);
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getItemVendors(req, res, next) {
+  try {
+    const data = await itemService.getVendorMappingsForItem(req.params.id);
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateItemVendors(req, res, next) {
+  try {
+    const itemId = req.params.id;
+    const { mappings } = req.body;
+
+    await vendorCtrl.bulkUpdateVendorMappings(itemId, mappings);
     res.json({ success: true });
   } catch (err) {
     next(err);

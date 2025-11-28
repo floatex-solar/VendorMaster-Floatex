@@ -102,3 +102,38 @@ export function useBulkDeleteItem() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["items"] }),
   });
 }
+
+// -----------------------------------------
+// GET VENDOR MAPPINGS FOR AN ITEM
+// -----------------------------------------
+export function useItemVendorMappings(itemId) {
+  return useQuery({
+    queryKey: ["item-vendor-mappings", itemId],
+    queryFn: async () => {
+      const res = await api.get(`/items/${itemId}/vendors`);
+      return res.data; // array of { mappingId, vendorId, vendorName, gst, price, uom, leadTimeDays, notes }
+    },
+    enabled: !!itemId,
+    staleTime: 2000,
+  });
+}
+
+// -----------------------------------------
+// SAVE ALL VENDOR MAPPINGS FOR AN ITEM
+// -----------------------------------------
+export function useSaveItemVendorMappings(itemId) {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (mappingsArray) => {
+      const payload = { mappings: mappingsArray };
+      const res = await api.put(`/items/${itemId}/vendors`, payload);
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["item-vendor-mappings", itemId] });
+      qc.invalidateQueries({ queryKey: ["items"] });
+      qc.invalidateQueries({ queryKey: ["item", itemId] });
+    },
+  });
+}

@@ -10,4 +10,7 @@ router.put("/:id", itemCtrl.update);
 router.delete("/bulk", itemCtrl.bulkRemove); // New bulk delete route
 router.delete("/:id", itemCtrl.remove);
 
+router.get("/:id/vendors", itemCtrl.getItemVendors);
+router.put("/:id/vendors", itemCtrl.updateItemVendors);
+
 export default router;

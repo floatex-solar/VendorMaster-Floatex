@@ -8,6 +8,8 @@ import {
 import { formatId, nextIdFromRows } from "../utils/id-generator.js";
 
 const RANGE = "Items!A:H";
+const VENDOR_RANGE = "Vendors!A:L";
+const MAPPING_RANGE = "VendorItemsMapping!A:H";
 
 function now() {
   return new Date().toISOString().replace("T", " ").split(".")[0];
@@ -180,4 +182,35 @@ export async function bulkDelete(ids) {
   });
 
   return true;
+}
+
+export async function getVendorMappingsForItem(itemId) {
+  const vendorRows = await getValues(VENDOR_RANGE);
+  const mappingRows = await getValues(MAPPING_RANGE);
+
+  const vendors = vendorRows.slice(1).map((r) => ({
+    vendorId: r[0],
+    name: r[1],
+    gst: r[6],
+  }));
+
+  const mappings = mappingRows
+    .slice(1)
+    .filter((r) => r[2] === itemId && r[7] !== "false")
+    .map((r) => {
+      const vendor = vendors.find((v) => v.vendorId === r[1]);
+      return {
+        mappingId: r[0],
+        vendorId: r[1],
+        vendorName: vendor?.name || "",
+        gst: vendor?.gst || "",
+        itemId: r[2],
+        price: r[3],
+        uom: r[4],
+        leadTimeDays: r[5],
+        notes: r[6],
+      };
+    });
+
+  return mappings;
 }
