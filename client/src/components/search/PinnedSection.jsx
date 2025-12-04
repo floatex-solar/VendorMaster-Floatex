@@ -39,7 +39,9 @@ export default function PinnedSection({ pinnedData, onUnpin, onView }) {
                 <div className="text-sm text-muted-foreground">
                   {p.item.categoryName} › {p.item.subCategoryName}
                 </div>
-                <div className="text-sm mt-1">{p.vendors.length} vendors</div>
+                <div className="text-xs mt-1 bg-indigo-600 text-white rounded-full w-fit px-2">
+                  {p.vendors.length} vendors
+                </div>
               </div>
 
               <div className="flex gap-2">

@@ -249,7 +249,7 @@ export default function SearchPage() {
                     <div className="text-xs text-muted-foreground">
                       {r.item.categoryName} › {r.item.subCategoryName}
                     </div>
-                    <div className="text-sm mt-1 bg-indigo-600 text-white rounded-full w-fit px-2">
+                    <div className="text-xs mt-1 bg-indigo-600 text-white rounded-full w-fit px-2">
                       {(r.vendors || []).length} vendor
                       {(r.vendors || []).length !== 1 ? "s" : ""}
                     </div>
