@@ -55,9 +55,8 @@ export async function createRfq({ vendor, items, sendEmail, sendWhatsApp }) {
     try {
       await sendWhatsAppMessage({
         receiverMobileNo: vendor.phone,
-        vendorName: vendor.name,
-        rfqNo,
-        pdfUrl,
+        filePathUrl: "",
+        message: `Dear ${vendor.name},\n\nPlease find RFQ ${rfqNo} at the link below.\n\n${pdfUrl}\n\nThank you`,
       });
       whatsappStatus = "SENT";
     } catch (err) {
