@@ -12,6 +12,10 @@ import { useCategories, useSubCategories } from "../hooks/useCategories";
 import Select from "react-select";
 import { customSelectStyles } from "../utils/customSelectStyles";
 import { useQueryClient } from "@tanstack/react-query";
+import RfqItemDetailsModal from "../components/rfq/RfqItemDetailsModal";
+import RfqVendorTabsModal from "../components/rfq/RfqVendorTabsModal";
+import { useCreateRfq } from "../hooks/useRfq";
+import { toast } from "sonner";
 
 export default function SearchPage() {
   const [term, setTerm] = useState("");
@@ -23,6 +27,11 @@ export default function SearchPage() {
   const { data: subcategories = [] } = useSubCategories();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const createRfqMutation = useCreateRfq();
+
+  const [rfqItemModalOpen, setRfqItemModalOpen] = useState(false);
+  const [rfqVendorModalOpen, setRfqVendorModalOpen] = useState(false);
+  const [rfqItems, setRfqItems] = useState([]);
 
   const queryClient = useQueryClient();
 
@@ -143,6 +152,23 @@ export default function SearchPage() {
       await deletePin.mutateAsync(pinId);
     } catch (err) {
       console.error("Unpin error", err);
+    }
+  }
+
+  async function handleSendRFQ({ vendor, sendEmail, sendWhatsApp, items }) {
+    try {
+      const res = await createRfqMutation.mutateAsync({
+        vendor,
+        items,
+        sendEmail,
+        sendWhatsApp,
+      });
+
+      toast.success(`RFQ ${res.rfqNo} created`);
+      return res;
+    } catch (err) {
+      toast.error(err.message || "Failed to create RFQ");
+      throw err;
     }
   }
 
@@ -284,6 +310,7 @@ export default function SearchPage() {
           pinnedData={pinnedDetailed}
           onUnpin={(pinId) => handleUnpin(pinId)}
           onView={openDialogForPinned}
+          onCreateRfq={() => setRfqItemModalOpen(true)}
         />
       )}
 
@@ -296,6 +323,25 @@ export default function SearchPage() {
           selectedData &&
           pinned.some((p) => p.itemId === selectedData.item.itemId)
         }
+      />
+
+      <RfqItemDetailsModal
+        open={rfqItemModalOpen}
+        onOpenChange={setRfqItemModalOpen}
+        onUnpin={(pinId) => handleUnpin(pinId)}
+        pinnedItems={pinnedDetailed}
+        onProceed={(items) => {
+          setRfqItems(items);
+          setRfqVendorModalOpen(true); // next modal
+        }}
+      />
+
+      <RfqVendorTabsModal
+        open={rfqVendorModalOpen}
+        onOpenChange={setRfqVendorModalOpen}
+        rfqItems={rfqItems}
+        onSendSingle={handleSendRFQ}
+        isSending={createRfqMutation.isPending}
       />
     </div>
   );

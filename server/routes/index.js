@@ -9,6 +9,7 @@ import uomRoutes from "./uom.routes.js";
 import vendorRoutes from "./vendor.routes.js";
 import searchRoutes from "./search.routes.js";
 import pinnedRoutes from "./pinned.routes.js";
+import rfqRoutes from "./rfq.routes.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -35,5 +36,8 @@ router.use("/search", searchRoutes);
 
 // Pinned Route
 router.use("/pinned", pinnedRoutes);
+
+// RFQ Route
+router.use("/rfqs", rfqRoutes);
 
 export default router;

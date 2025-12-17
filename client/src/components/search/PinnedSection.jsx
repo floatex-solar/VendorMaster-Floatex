@@ -1,10 +1,15 @@
 // src/components/search/PinnedSection.jsx
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Download, X, Eye, PinOff } from "lucide-react";
+import { Download, X, Eye, PinOff, FileText } from "lucide-react";
 import { exportVendorsToExcel } from "../../utils/exportToExcel";
 
-export default function PinnedSection({ pinnedData, onUnpin, onView }) {
+export default function PinnedSection({
+  pinnedData,
+  onUnpin,
+  onView,
+  onCreateRfq,
+}) {
   const handleExport = () => {
     exportVendorsToExcel(pinnedData);
   };
@@ -21,6 +26,15 @@ export default function PinnedSection({ pinnedData, onUnpin, onView }) {
             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
           >
             <Download size={16} /> Export
+          </Button>
+
+          {/* ✅ Create RFQ button */}
+          <Button
+            onClick={onCreateRfq}
+            disabled={pinnedData.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+          >
+            <FileText size={16} /> Create RFQ
           </Button>
         </div>
       </div>
