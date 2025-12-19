@@ -70,7 +70,7 @@ export async function deletePin(pinId) {
   if (idx === -1) throw new Error("Pin not found");
 
   const sheetRow = idx + 1; // rows array is 0-based; header is row 1
-  await updateValues(`${SHEET_NAME}!A${sheetRow}:E${sheetRow}`, [
+  await updateValues(`${SHEET_NAME}!A${sheetRow}:H${sheetRow}`, [
     ["", "", "", "", ""],
   ]);
   return { success: true };
