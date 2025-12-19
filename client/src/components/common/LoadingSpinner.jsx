@@ -1,12 +1,16 @@
 import React from "react";
 import { Spinner } from "@/components/ui/spinner";
 
-function LoadingSpinner() {
+function LoadingSpinner({
+  text = "Loading...",
+  className = "",
+  showIcon = true,
+}) {
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       <div className="flex items-center justify-center gap-2">
-        <Spinner />
-        Loading...
+        {showIcon && <Spinner />}
+        {text}
       </div>
     </div>
   );

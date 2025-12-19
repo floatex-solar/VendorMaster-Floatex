@@ -72,16 +72,16 @@ export default function RfqItemDetailsModal({
               key={item.itemId}
               className="border rounded-lg p-4 bg-card space-y-3"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="flex items-start md:items-center justify-between">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
                   <div className="py-1 px-3 bg-indigo-600 text-white rounded">
                     {idx + 1}
                   </div>
                   <div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-col">
                       <div className="font-semibold">{item.description}</div>
                       <div className="text-xs text-muted-foreground">
-                        ({item.categoryName} › {item.subCategoryName})
+                        {item.categoryName} › {item.subCategoryName}
                       </div>
                     </div>
 
@@ -126,7 +126,12 @@ export default function RfqItemDetailsModal({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleProceed}>Proceed</Button>
+          <Button
+            onClick={handleProceed}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white hover:text-white"
+          >
+            Proceed
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

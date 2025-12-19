@@ -4,6 +4,7 @@ import {
   Users,
   Search,
   Settings,
+  FileText,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -22,6 +23,7 @@ const menuItems = [
   // { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Items Master", url: "/items", icon: Package },
   { title: "Vendors Master", url: "/vendors", icon: Users },
+  { title: "RFQs", url: "/rfqs", icon: FileText },
   { title: "Search & Pin", url: "/search", icon: Search },
   // { title: "Settings", url: "/settings", icon: Settings },
 ];

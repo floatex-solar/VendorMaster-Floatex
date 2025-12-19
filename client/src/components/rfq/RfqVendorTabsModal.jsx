@@ -8,9 +8,19 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, CircleAlert, CircleCheckBig, Loader } from "lucide-react";
+import RfqPdfPreviewModal from "./RfqPdfPreviewModal";
+import RfqVendorTab from "./RfqVendorTab";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { normalizeValue, isVendorValid, getVendorError } from "./utils";
+import { cx } from "class-variance-authority";
+import { toast } from "sonner";
+import { useCreateRfq } from "../../hooks/useRfq.js";
+import { CircleX } from "lucide-react";
 
 /* ----------------------------------
    Group RFQ items by vendor
@@ -20,19 +30,17 @@ function groupByVendor(rfqItems) {
 
   rfqItems.forEach((item) => {
     item.vendors.forEach((v) => {
-      const vendorId = v.vendor.vendorId;
+      const id = v.vendor.vendorId;
 
-      if (!map[vendorId]) {
-        map[vendorId] = {
+      if (!map[id]) {
+        map[id] = {
           vendor: v.vendor,
           contacts: v.contacts || [],
-          sendWhatsApp: true,
-          sendEmail: true,
           items: [],
         };
       }
 
-      map[vendorId].items.push({
+      map[id].items.push({
         itemId: item.itemId,
         description: item.description,
         categoryName: item.categoryName,
@@ -51,246 +59,348 @@ export default function RfqVendorTabsModal({
   open,
   onOpenChange,
   rfqItems = [],
-  onSendSingle,
-  isSending,
 }) {
-  const vendors = useMemo(() => groupByVendor(rfqItems), [rfqItems]);
+  const baseVendors = useMemo(() => groupByVendor(rfqItems), [rfqItems]);
 
+  const [vendors, setVendors] = useState([]);
   const [activeTab, setActiveTab] = useState("");
-  const [sendingVendorId, setSendingVendorId] = useState(null);
-  const [sendingAll, setSendingAll] = useState(false);
   const [sentVendors, setSentVendors] = useState(new Set());
+  const [failedVendors, setFailedVendors] = useState(new Set());
+
+  const [sendingAll, setSendingAll] = useState(false);
 
   const [globalWhatsApp, setGlobalWhatsApp] = useState(true);
   const [globalEmail, setGlobalEmail] = useState(true);
 
-  /* ✅ Select first vendor by default */
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const createRfqMutation = useCreateRfq();
+
   useEffect(() => {
-    if (open && vendors.length > 0) {
-      setActiveTab(vendors[0].vendor.vendorId);
+    if (!open) return;
+
+    setVendors(
+      baseVendors.map((v) => ({
+        ...v,
+        email: normalizeValue(v.vendor.email),
+        phone: normalizeValue(v.vendor.phone),
+        selectedContactIndex: null,
+      }))
+    );
+
+    if (baseVendors.length > 0) {
+      setActiveTab(String(baseVendors[0].vendor.vendorId));
     }
-  }, [open, vendors]);
+  }, [open, baseVendors]);
 
-  async function handleSendVendor(v) {
-    setSendingVendorId(v.vendor.vendorId);
-
-    await onSendSingle({
-      vendor: v.vendor,
-      sendWhatsApp: v.sendWhatsApp,
-      sendEmail: v.sendEmail,
-      items: v.items,
-    });
-
-    setSentVendors((s) => new Set(s).add(v.vendor.vendorId));
-    setSendingVendorId(null);
-  }
-
-  async function handleSendAll() {
+  async function processRfqBatch({
+    shouldProcess,
+    onSuccessMessage,
+    onFailureMessage,
+  }) {
     setSendingAll(true);
 
     for (const v of vendors) {
-      if (sentVendors.has(v.vendor.vendorId)) continue;
+      const vendorId = v.vendor.vendorId;
 
-      await onSendSingle({
-        vendor: v.vendor,
-        sendWhatsApp: globalWhatsApp,
-        sendEmail: globalEmail,
-        items: v.items,
-      });
+      if (!shouldProcess(v)) continue;
 
-      setSentVendors((s) => new Set(s).add(v.vendor.vendorId));
+      setActiveTab(String(vendorId));
+
+      try {
+        const res = await createRfqMutation.mutateAsync({
+          vendor: {
+            ...v.vendor,
+            email: v.email,
+            phone: v.phone,
+          },
+          sendEmail: globalEmail,
+          sendWhatsApp: globalWhatsApp,
+          items: v.items,
+        });
+
+        toast.success(onSuccessMessage(v, res));
+
+        setSentVendors((prev) => new Set(prev).add(vendorId));
+        setFailedVendors((prev) => {
+          const next = new Set(prev);
+          next.delete(vendorId);
+          return next;
+        });
+      } catch (err) {
+        console.error("RFQ failed for vendor:", vendorId, err);
+
+        toast.error(onFailureMessage(v, err));
+
+        setFailedVendors((prev) => new Set(prev).add(vendorId));
+      }
     }
 
     setSendingAll(false);
   }
 
+  function validateVendors(filterFn) {
+    for (const v of vendors) {
+      if (!filterFn(v)) continue;
+
+      if (!isVendorValid(v, globalEmail, globalWhatsApp)) {
+        toast.error(`Email or Phone Missing or Invalid for ${v.vendor.name}!`);
+        setActiveTab(String(v.vendor.vendorId));
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function handleSendAll() {
+    if (allRfqsSent) {
+      toast.info("All RFQs are already sent");
+      return;
+    }
+
+    const shouldProcess = (v) => !sentVendors.has(v.vendor.vendorId);
+
+    if (!validateVendors(shouldProcess)) return;
+
+    await processRfqBatch({
+      shouldProcess,
+      onSuccessMessage: (v, res) => `RFQ ${res.rfqNo} created`,
+      onFailureMessage: (v) => `Failed to send RFQ to ${v.vendor.name}`,
+    });
+  }
+
+  async function handleRetryFailed() {
+    if (failedVendors.size === 0) {
+      toast.info("No failed RFQs to retry");
+      return;
+    }
+
+    const shouldProcess = (v) => failedVendors.has(v.vendor.vendorId);
+
+    if (!validateVendors(shouldProcess)) return;
+
+    await processRfqBatch({
+      shouldProcess,
+      onSuccessMessage: (v, res) => `RFQ ${res.rfqNo} resent successfully`,
+      onFailureMessage: (v) => `Retry failed for ${v.vendor.name}`,
+    });
+  }
+
+  useEffect(() => {
+    if (!sendingAll) return;
+
+    const handleBeforeUnload = (e) => {
+      // Required for modern browsers
+      e.preventDefault();
+
+      // Chrome requires returnValue to be set
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [sendingAll]);
+
+  const allRfqsSent = vendors.length > 0 && sentVendors.size === vendors.length;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-11/12 max-h-[90vh] overflow-auto w-full">
-        <DialogHeader className="flex-row items-center justify-between">
+    <Dialog
+      open={open}
+      onOpenChange={() => {
+        !sendingAll && onOpenChange();
+      }}
+    >
+      <DialogContent className="sm:max-w-11/12 max-h-[90vh] overflow-auto w-full p-2 md:p-6">
+        <DialogHeader className="md:flex-row items-start md:items-center md:justify-between">
           <DialogTitle className="text-indigo-600">
             Send RFQ to Vendors
           </DialogTitle>
 
-          {/* Global actions */}
-          <div className="flex justify-end gap-3 mr-4">
-            <div className="flex justify-end gap-4 ">
-              <div className="flex items-center gap-2">
-                <Switch
-                  size="sm"
-                  checked={globalWhatsApp}
-                  onCheckedChange={setGlobalWhatsApp}
-                />
-                WhatsApp
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  size="sm"
-                  checked={globalEmail}
-                  onCheckedChange={setGlobalEmail}
-                />
-                Email
-              </div>
+          <div className="grid grid-cols-2 md:flex items-center gap-3 mr-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={globalWhatsApp}
+                onCheckedChange={setGlobalWhatsApp}
+                disabled={sendingAll || allRfqsSent}
+              />
+              WhatsApp
             </div>
-
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={globalEmail}
+                disabled={sendingAll || allRfqsSent}
+                onCheckedChange={setGlobalEmail}
+              />
+              Email
+            </div>
             <Button
-              size="sm"
               variant="outline"
+              disabled={sendingAll}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button
-              size="sm"
-              disabled={sendingVendorId || sendingAll}
-              onClick={handleSendAll}
-            >
-              {sendingAll ? "Sending..." : "Send All RFQs"}
-            </Button>
+            {failedVendors.size === 0 && (
+              <Button
+                disabled={sendingAll || allRfqsSent}
+                onClick={handleSendAll}
+                className={cx(
+                  "bg-indigo-600 hover:bg-indigo-700 hover:text-white text-white",
+                  allRfqsSent &&
+                    "bg-green-600 hover:bg-green-700 text-white hover:text-white"
+                )}
+              >
+                <Loader
+                  className={cx("hidden", sendingAll && "!block animate-spin")}
+                />
+                {allRfqsSent
+                  ? "All RFQs Sent"
+                  : sendingAll
+                  ? "Sending..."
+                  : "Send All RFQs"}
+
+                {allRfqsSent && <CircleCheckBig />}
+              </Button>
+            )}
+
+            {failedVendors.size > 0 && (
+              <Button
+                variant="destructive"
+                disabled={sendingAll || failedVendors.size === 0}
+                onClick={handleRetryFailed}
+              >
+                <Loader
+                  className={cx("hidden", sendingAll && "!block animate-spin")}
+                />
+                {allRfqsSent
+                  ? "All RFQs Sent"
+                  : sendingAll
+                  ? "Sending..."
+                  : `Retry Failed (${failedVendors.size})`}
+              </Button>
+            )}
           </div>
         </DialogHeader>
 
+        {allRfqsSent && (
+          <div className="flex items-center justify-center w-full">
+            <div className="px-4 py-2 rounded-full flex items-center gap-2 bg-green-600 text-white text-sm">
+              <p>All RFQs have been sent successfully</p>
+              <CircleCheckBig className="size-4" />
+            </div>
+          </div>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="flex gap-1 bg-transparent border">
-            {vendors.map((v) => (
-              <TabsTrigger
-                key={v.vendor.vendorId}
-                value={v.vendor.vendorId}
-                className="rounded-t-md border px-4 data-[state=active]:bg-black data-[state=active]:text-white cursor-pointer "
-              >
-                {v.vendor.name}
-                {sentVendors.has(v.vendor.vendorId) && (
-                  <CheckCircle className="ml-2 text-green-600" size={16} />
-                )}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="overflow-auto w-[87vw] sm:w-full">
+            <TabsList className="border bg-transparent gap-1 ">
+              {vendors.map((v) => {
+                const vendorId = v.vendor.vendorId;
+                const invalid = !isVendorValid(v, globalEmail, globalWhatsApp);
+                const failed = failedVendors.has(vendorId);
+                const sent = sentVendors.has(vendorId);
+                const isActiveTab = activeTab === String(v.vendor.vendorId);
+
+                return (
+                  <TabsTrigger
+                    key={vendorId}
+                    value={String(vendorId)}
+                    disabled={sendingAll}
+                    className={cx(
+                      "data-[state=active]:bg-indigo-100 cursor-pointer data-[state=active]:border data-[state=active]:border-indigo-300",
+                      sent &&
+                        "data-[state=active]:bg-green-700 bg-green-600 !text-white data-[state=active]:border-green-600",
+                      failed &&
+                        "bg-red-100 data-[state=active]:bg-red-600 bg-red-500 !text-white data-[state=active]:border-red-600"
+                    )}
+                  >
+                    {v.vendor.name}
+
+                    {/* ❌ Failed */}
+                    {((failed && !sent && !sendingAll) ||
+                      (sendingAll && !isActiveTab && !sent)) && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CircleX size={16} className="ml-2 text-white" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Failed to send RFQ. You can retry.
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+
+                    {sent && (
+                      <CheckCircle size={16} className="ml-2 text-white" />
+                    )}
+
+                    {activeTab === String(v.vendor.vendorId) && sendingAll && (
+                      <Loader
+                        className={cx(
+                          "animate-spin ml-2 text-black",
+                          failed && "text-white"
+                        )}
+                      />
+                    )}
+
+                    {invalid && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CircleAlert
+                              size={16}
+                              className="ml-2 text-red-600"
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {getVendorError(v, globalEmail, globalWhatsApp)}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
 
           {vendors.map((v) => (
             <TabsContent
               key={v.vendor.vendorId}
-              value={v.vendor.vendorId}
-              className="border rounded-md p-4 space-y-6"
+              value={String(v.vendor.vendorId)}
             >
-              {/* Vendor Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-lg p-4 bg-muted/30">
-                <div>
-                  <div className="text-lg font-semibold text-indigo-600">
-                    {v.vendor.name}
-                  </div>
-                  <div className="text-sm">Vendor ID: {v.vendor.vendorId}</div>
-                  <div className="text-sm">{v.vendor.email}</div>
-                  <div className="text-sm">{v.vendor.phone}</div>
-                </div>
-
-                <div className="text-sm">
-                  <div>{v.vendor.address}</div>
-                  <div>
-                    {v.vendor.city}, {v.vendor.state}
-                  </div>
-                  <div className="font-medium">GST: {v.vendor.gst}</div>
-                </div>
-
-                {v.contacts.length > 0 && (
-                  <div className="md:col-span-2">
-                    <div className="font-semibold mb-2">Contact Persons</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {v.contacts.map((c, i) => (
-                        <div
-                          key={i}
-                          className="border rounded-md p-3 text-sm bg-card flex justify-between"
-                        >
-                          <div>
-                            <div className="font-medium">{c.name}</div>
-                            <div className="text-muted-foreground">
-                              {c.designation}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-right">{c.phone}</div>
-                            <div className="text-right">{c.email}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Items */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {v.items.map((i, idx) => (
-                  <div key={i.itemId} className="border rounded-md p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="py-1 px-3 bg-indigo-600 text-white rounded">
-                        {idx + 1}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <div className="font-semibold">{i.description}</div>
-                          <div className="text-xs text-muted-foreground">
-                            ({i.categoryName} › {i.subCategoryName})
-                          </div>
-                        </div>
-
-                        <div className="text-xs text-muted-foreground">
-                          {i.itemId} • {i.uom}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid  gap-4 mt-3">
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          Quantity
-                        </label>
-                        <Input value={i.qty} readOnly disabled />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">
-                          Custom Description
-                        </label>
-                        <Textarea
-                          value={i.customDescription}
-                          readOnly
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Vendor Actions */}
-              {/* <div className="flex justify-between items-center pt-4 border-t">
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={v.sendWhatsApp}
-                      onCheckedChange={(val) => (v.sendWhatsApp = val)}
-                    />
-                    WhatsApp
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={v.sendEmail}
-                      onCheckedChange={(val) => (v.sendEmail = val)}
-                    />
-                    Email
-                  </div>
-                </div>
-
-                <Button
-                  disabled={sendingAll || sendingVendorId}
-                  onClick={() => handleSendVendor(v)}
-                >
-                  {sendingVendorId === v.vendor.vendorId
-                    ? "Sending..."
-                    : "Send RFQ"}
-                </Button>
-              </div> */}
+              <RfqVendorTab
+                vendor={v}
+                onChange={(updated) =>
+                  setVendors((prev) =>
+                    prev.map((x) =>
+                      x.vendor.vendorId === updated.vendor.vendorId
+                        ? updated
+                        : x
+                    )
+                  )
+                }
+                onPreview={() => setPreviewOpen(true)}
+                requireEmail={globalEmail}
+                sendingAll={sendingAll}
+                requirePhone={globalWhatsApp}
+                rfqSent={sentVendors.has(v.vendor.vendorId)}
+                rfqFailed={failedVendors.has(v.vendor.vendorId)}
+              />
             </TabsContent>
           ))}
         </Tabs>
+
+        <RfqPdfPreviewModal
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          vendor={vendors[0]?.vendor}
+          items={vendors[0]?.items}
+        />
       </DialogContent>
     </Dialog>
   );

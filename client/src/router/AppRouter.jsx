@@ -6,6 +6,7 @@ import VendorPage from "../pages/VendorPage";
 import SearchPage from "../pages/SearchPage";
 import LoginPage from "../pages/LoginPage";
 import PrivateRoute from "./PrivateRoute";
+import RfqPage from "../pages/RfqPage";
 
 export default function AppRouter() {
   return (
@@ -19,6 +20,7 @@ export default function AppRouter() {
           <Route element={<AppLayout />}>
             <Route path="/items" element={<ItemsPage />} />
             <Route path="/vendors" element={<VendorPage />} />
+            <Route path="/rfqs" element={<RfqPage />} />
             <Route path="/search" element={<SearchPage />} />
           </Route>
         </Route>

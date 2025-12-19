@@ -12,11 +12,21 @@ export async function listPins(req, res, next) {
 
 export async function createPin(req, res, next) {
   try {
-    const { itemId, itemDescription, searchTerm } = req.body;
+    const {
+      itemId,
+      itemDescription,
+      categoryName,
+      subCategoryName,
+      uomName,
+      searchTerm,
+    } = req.body;
     if (!itemId) return res.status(400).json({ error: "itemId is required" });
     const pin = await pinnedService.createPin({
       itemId,
       itemDescription,
+      categoryName,
+      subCategoryName,
+      uomName,
       searchTerm,
     });
     res.status(201).json(pin);

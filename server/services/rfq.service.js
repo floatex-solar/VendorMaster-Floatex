@@ -7,6 +7,28 @@ import { sendWhatsAppMessage } from "./whatsapp.service.js";
 import { updateValues } from "../lib/google-sheets.js";
 
 const RFQ_SHEET = "RFQs!A:J";
+function now() {
+  return new Date().toISOString().replace("T", " ").split(".")[0];
+}
+
+export async function getRfqs() {
+  const rows = await getValues(RFQ_SHEET);
+
+  const [, ...data] = rows; // skip header
+
+  return data.map((r) => ({
+    createdAt: r[0],
+    rfqNo: r[1],
+    date: r[2],
+    vendorId: r[3],
+    vendorName: r[4],
+    email: r[5],
+    phone: r[6],
+    emailStatus: r[7],
+    whatsappStatus: r[8],
+    pdfUrl: r[9],
+  }));
+}
 
 export async function createRfq({ vendor, items, sendEmail, sendWhatsApp }) {
   // 1. Generate RFQ number
@@ -28,8 +50,6 @@ export async function createRfq({ vendor, items, sendEmail, sendWhatsApp }) {
     fileName: `${rfqNo}.pdf`,
   });
 
-  const now = new Date().toISOString();
-
   let emailStatus = "NOT SENT";
   let whatsappStatus = "NOT SENT";
 
@@ -50,15 +70,16 @@ export async function createRfq({ vendor, items, sendEmail, sendWhatsApp }) {
     }
   }
 
-  // 5. Send WhatsApp
+  // // 5. Send WhatsApp
   if (sendWhatsApp && vendor.phone) {
     try {
-      await sendWhatsAppMessage({
+      const res = await sendWhatsAppMessage({
         receiverMobileNo: vendor.phone,
         filePathUrl: "",
         message: `Dear ${vendor.name},\n\nPlease find RFQ ${rfqNo} at the link below.\n\n${pdfUrl}\n\nThank you`,
       });
-      whatsappStatus = "SENT";
+      if (res.success) whatsappStatus = "SENT";
+      else whatsappStatus = "FAILED";
     } catch (err) {
       whatsappStatus = "FAILED";
       console.error("WhatsApp failed:", err.message);
@@ -69,13 +90,13 @@ export async function createRfq({ vendor, items, sendEmail, sendWhatsApp }) {
 
   await appendValues(RFQ_SHEET, [
     [
-      now,
+      now(),
       rfqNo,
-      now.split("T")[0],
+      now(),
       vendor.vendorId,
       vendor.name,
-      sendEmail ? now : "",
-      sendWhatsApp ? now : "",
+      sendEmail ? vendor.email : "",
+      sendWhatsApp ? vendor.phone : "",
       emailStatus,
       whatsappStatus,
       pdfUrl,

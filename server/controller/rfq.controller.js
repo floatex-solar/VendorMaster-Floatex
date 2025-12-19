@@ -1,4 +1,14 @@
-import { createRfq } from "../services/rfq.service.js";
+import { createRfq, getRfqs } from "../services/rfq.service.js";
+import { generateRfqPdfBuffer } from "../services/rfqPdf.service.js";
+
+export async function getRfqsController(req, res) {
+  try {
+    const rfqs = await getRfqs();
+    res.json(rfqs);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
 
 export async function createRfqController(req, res) {
   try {
@@ -15,5 +25,25 @@ export async function createRfqController(req, res) {
   } catch (err) {
     console.error("RFQ Error:", err);
     res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+export async function previewRfqPdfController(req, res) {
+  try {
+    const { vendor, items } = req.body;
+
+    const pdfBuffer = await generateRfqPdfBuffer({
+      rfqNo: "RFQ-PREVIEW",
+      vendor,
+      items,
+    });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline");
+
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error("Preview PDF error:", err);
+    res.status(500).json({ message: err.message });
   }
 }

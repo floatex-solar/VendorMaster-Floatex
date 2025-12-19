@@ -3,7 +3,7 @@ import { getValues, appendValues, updateValues } from "../lib/google-sheets.js";
 import { nextIdFromRows, formatId } from "../utils/id-generator.js";
 
 const SHEET_NAME = "PinnedItems";
-const RANGE = `${SHEET_NAME}!A:E`;
+const RANGE = `${SHEET_NAME}!A:H`;
 
 /**
  * getAllPins - returns all pins (non-empty rows)
@@ -16,8 +16,11 @@ export async function getAllPins() {
       pinId: r[0],
       itemId: r[1],
       itemDescription: r[2],
-      searchTerm: r[3],
-      createdAt: r[4],
+      categoryName: r[3],
+      subCategoryName: r[4],
+      uomName: r[5],
+      searchTerm: r[6],
+      createdAt: r[7],
     }))
     .filter((r) => r.pinId && r.itemId);
 }
@@ -26,7 +29,14 @@ export async function getAllPins() {
  * createPin - store a pin row
  * payload: { itemId, itemDescription, searchTerm }
  */
-export async function createPin({ itemId, itemDescription, searchTerm }) {
+export async function createPin({
+  itemId,
+  itemDescription,
+  categoryName,
+  subCategoryName,
+  uomName,
+  searchTerm,
+}) {
   // generate next id using utils
   const idRows = await getValues(`${SHEET_NAME}!A:A`);
   const next = nextIdFromRows(idRows, "PIN");
@@ -34,7 +44,16 @@ export async function createPin({ itemId, itemDescription, searchTerm }) {
 
   const createdAt = new Date().toISOString();
   const row = [
-    [pinId, itemId, itemDescription || "", searchTerm || "", createdAt],
+    [
+      pinId,
+      itemId,
+      itemDescription || "",
+      categoryName || "",
+      subCategoryName || "",
+      uomName || "",
+      searchTerm || "",
+      createdAt,
+    ],
   ];
 
   await appendValues(RANGE, row);
