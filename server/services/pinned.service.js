@@ -71,7 +71,7 @@ export async function deletePin(pinId) {
 
   const sheetRow = idx + 1; // rows array is 0-based; header is row 1
   await updateValues(`${SHEET_NAME}!A${sheetRow}:H${sheetRow}`, [
-    ["", "", "", "", ""],
+    ["", "", "", "", "", "", "", ""],
   ]);
   return { success: true };
 }
