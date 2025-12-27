@@ -33,11 +33,13 @@ export default function VendorPage() {
       />
 
       <VendorForm open={open} onOpenChange={setOpen} />
-      <EditVendorForm
-        open={editOpen}
-        setOpen={setEditOpen}
-        vendorData={selectedVendor}
-      />
+      {editOpen && (
+        <EditVendorForm
+          open={editOpen}
+          setOpen={setEditOpen}
+          vendorData={selectedVendor}
+        />
+      )}
     </div>
   );
 }
