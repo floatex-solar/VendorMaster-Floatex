@@ -21,6 +21,7 @@ export default function VendorMappingRow({
   errors,
 }) {
   const row = watch(`mappings.${index}`);
+  console.log(row);
   const disabled = row.deleted;
 
   const vendorValue = useMemo(
@@ -124,7 +125,31 @@ export default function VendorMappingRow({
 
       {/* Delete / Undo */}
       <div className="flex items-end w-full">
-        {!disabled ? (
+        {row.mappingId ? (
+          !disabled ? (
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              onClick={() => markDeleted(index)}
+              disabled
+              className="w-full"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => undoDelete(index)}
+              disabled
+              className="w-full"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          )
+        ) : (
           <Button
             type="button"
             variant="destructive"
@@ -133,16 +158,6 @@ export default function VendorMappingRow({
             className="w-full"
           >
             <Trash2 className="w-4 h-4" />
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => undoDelete(index)}
-            className="w-full"
-          >
-            <RotateCcw className="w-4 h-4" />
           </Button>
         )}
       </div>

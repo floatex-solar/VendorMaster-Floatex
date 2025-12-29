@@ -347,13 +347,13 @@ export default function ItemTable({ onEdit }) {
                       >
                         <Pencil />
                       </Button>
-                      <Button
+                      {/* <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => handleIndividualDelete(it)}
                       >
                         <Trash2 />
-                      </Button>
+                      </Button> */}
                     </TableCell>
                   </TableRow>
                 ))}

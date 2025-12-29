@@ -575,7 +575,8 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                             }
                             size="sm"
                             onClick={() => toggleContactDelete(idx)}
-                            disabled={updateVendor.isPending}
+                            // disabled={updateVendor.isPending}
+                            disabled
                             className="w-full sm:w-fit"
                           >
                             {watch(`contacts.${idx}._action`) === "delete" ? (
@@ -753,7 +754,8 @@ export default function EditVendorForm({ vendorData = null, open, setOpen }) {
                             }
                             size="sm"
                             onClick={() => toggleMappingDelete(idx)}
-                            disabled={updateVendor.isPending}
+                            // disabled={updateVendor.isPending}
+                            disabled
                             className="w-full sm:w-fit"
                           >
                             {watch(`mappings.${idx}._action`) === "delete" ? (
