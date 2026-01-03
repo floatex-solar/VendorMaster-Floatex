@@ -54,7 +54,7 @@ export default function PinnedSection({
                   {p.item.categoryName} › {p.item.subCategoryName}
                 </div>
                 <div className="text-xs mt-1 bg-indigo-600 text-white rounded-full w-fit px-2">
-                  {p.vendors.length} vendors
+                  {p?.vendors?.length} vendors
                 </div>
               </div>
 

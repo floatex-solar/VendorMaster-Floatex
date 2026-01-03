@@ -185,32 +185,160 @@ export async function bulkDelete(ids) {
 }
 
 export async function getVendorMappingsForItem(itemId) {
-  const vendorRows = await getValues(VENDOR_RANGE);
-  const mappingRows = await getValues(MAPPING_RANGE);
+  if (!itemId) return null;
 
-  const vendors = vendorRows.slice(1).map((r) => ({
-    vendorId: r[0],
-    name: r[1],
-    gst: r[6],
+  const [
+    itemsRows,
+    vendorRows,
+    contactRows,
+    mappingRows,
+    categoryRows,
+    subCategoryRows,
+    uomRows,
+  ] = await Promise.all([
+    getValues("Items!A:H"),
+    getValues("Vendors!A:L"),
+    getValues("VendorContacts!A:H"),
+    getValues("VendorItemsMapping!A:H"),
+    getValues("Categories!A:E"),
+    getValues("SubCategories!A:F"),
+    getValues("UOMs!A:D"),
+  ]);
+
+  const items = itemsRows.slice(1);
+  const vendors = vendorRows.slice(1);
+  const contacts = contactRows.slice(1);
+  const mappings = mappingRows.slice(1);
+  const categories = categoryRows.slice(1);
+  const subCats = subCategoryRows.slice(1);
+  const uoms = uomRows.slice(1);
+
+  /* -------------------- LOOKUPS -------------------- */
+
+  const categoryMap = {};
+  categories.forEach((c) => {
+    categoryMap[c[0]] = c[1];
+  });
+
+  const subCategoryMap = {};
+  subCats.forEach((sc) => {
+    subCategoryMap[sc[0]] = {
+      name: sc[2],
+      categoryId: sc[1],
+    };
+  });
+
+  const uomMap = {};
+  uoms.forEach((u) => {
+    uomMap[u[0]] = u[1];
+  });
+
+  /* -------------------- ITEM -------------------- */
+
+  const itemRow = items.find((i) => i[0] === itemId);
+  if (!itemRow) return null;
+
+  const item = {
+    itemId: itemRow[0],
+    categoryId: itemRow[1],
+    categoryName: categoryMap[itemRow[1]] || "",
+    subCategoryId: itemRow[2],
+    subCategoryName: subCategoryMap[itemRow[2]]?.name || "",
+    description: itemRow[3],
+    uomId: itemRow[4],
+    uomName: uomMap[itemRow[4]] || "",
+  };
+
+  /* -------------------- MAPPINGS -------------------- */
+
+  const matchedMappings = mappings
+    .filter((m) => m[2] === itemId && m[7] !== "false")
+    .map((m) => ({
+      mappingId: m[0],
+      vendorId: m[1],
+      itemId: m[2],
+      price: m[3],
+      uom: m[4],
+      leadTimeDays: m[5],
+      notes: m[6],
+    }));
+
+  /* -------------------- VENDORS -------------------- */
+
+  const vendorMap = {};
+  vendors.forEach((v) => {
+    if (v[11] !== "false") {
+      vendorMap[v[0]] = {
+        vendorId: v[0],
+        name: v[1],
+        address: v[2],
+        state: v[3],
+        city: v[4],
+        pinCode: v[5],
+        gst: v[6],
+        phone: v[7],
+        email: v[8],
+      };
+    }
+  });
+
+  /* -------------------- CONTACTS -------------------- */
+
+  const contactMap = {};
+  contacts.forEach((c) => {
+    if (c[7] === "false") return;
+    if (!contactMap[c[1]]) contactMap[c[1]] = [];
+    contactMap[c[1]].push({
+      contactId: c[0],
+      name: c[2],
+      designation: c[3],
+      phone: c[4],
+      email: c[5],
+      info: c[6],
+    });
+  });
+
+  /* -------------------- FINAL STRUCTURE -------------------- */
+
+  const vendorsResult = matchedMappings.map((m) => ({
+    vendor: vendorMap[m.vendorId] || null,
+    contacts: contactMap[m.vendorId] || [],
+    mapping: m,
   }));
 
-  const mappings = mappingRows
-    .slice(1)
-    .filter((r) => r[2] === itemId && r[7] !== "false")
-    .map((r) => {
-      const vendor = vendors.find((v) => v.vendorId === r[1]);
-      return {
-        mappingId: r[0],
-        vendorId: r[1],
-        vendorName: vendor?.name || "",
-        gst: vendor?.gst || "",
-        itemId: r[2],
-        price: r[3],
-        uom: r[4],
-        leadTimeDays: r[5],
-        notes: r[6],
-      };
-    });
-
-  return mappings;
+  return {
+    item,
+    vendors: vendorsResult,
+  };
 }
+
+// export async function getVendorMappingsForItem(itemId) {
+//   const vendorRows = await getValues(VENDOR_RANGE);
+//   const mappingRows = await getValues(MAPPING_RANGE);
+
+//   const vendors = vendorRows.slice(1).map((r) => ({
+//     vendorId: r[0],
+//     name: r[1],
+//     gst: r[6],
+//   }));
+
+//   const mappings = mappingRows
+//     .slice(1)
+//     .filter((r) => r[2] === itemId && r[7] !== "false")
+//     .map((r) => {
+//       const vendor = vendors.find((v) => v.vendorId === r[1]);
+//       return {
+//         mappingId: r[0],
+//         vendorId: r[1],
+//         vendorName: vendor?.name || "",
+//         gst: vendor?.gst || "",
+//         itemId: r[2],
+//         price: r[3],
+//         uom: r[4],
+//         leadTimeDays: r[5],
+//         notes: r[6],
+//       };
+//     });
+
+//   return mappings;
+// }

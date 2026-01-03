@@ -92,7 +92,7 @@ export default function SearchPage() {
           subCategoryName: p.subCategoryName,
           uomName: p.uomName,
         },
-        vendors: q?.data ?? [],
+        ...(q?.data ?? []),
         isLoadingVendors: q?.isLoading ?? true,
         pinId: p.pinId,
         pinned: true,
