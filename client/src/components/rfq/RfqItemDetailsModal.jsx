@@ -133,7 +133,13 @@ export default function RfqItemDetailsModal({
                   {item.files && item.files.length > 0 && (
                     <div className="flex flex-col gap-0.5 ml-1">
                       {item.files.map((f, i) => (
-                        <div key={i} className="text-xs text-green-600">
+                        <div
+                          key={i}
+                          className="text-xs text-green-600 cursor-pointer hover:underline"
+                          onClick={() =>
+                            window.open(URL.createObjectURL(f), "_blank")
+                          }
+                        >
                           selected: {f.name}
                         </div>
                       ))}

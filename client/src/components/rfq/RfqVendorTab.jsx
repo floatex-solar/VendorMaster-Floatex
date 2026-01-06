@@ -242,6 +242,22 @@ export default function RfqVendorTab({
               <Input value={i.qty} disabled />
               <Textarea value={i.customDescription} disabled />
             </div>
+
+            {i.files && i.files.length > 0 && (
+              <div className="flex flex-col gap-0.5 ml-1">
+                {i.files.map((f, idx) => (
+                  <div
+                    key={idx}
+                    className="text-xs text-green-600 cursor-pointer hover:underline"
+                    onClick={() =>
+                      window.open(URL.createObjectURL(f), "_blank")
+                    }
+                  >
+                    selected: {f.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
