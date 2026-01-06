@@ -48,6 +48,7 @@ function groupByVendor(rfqItems) {
         uom: item.uom,
         qty: item.qty,
         customDescription: item.customDescription,
+        files: item.files || [],
       });
     });
   });
@@ -108,7 +109,8 @@ export default function RfqVendorTabsModal({
       setActiveTab(String(vendorId));
 
       try {
-        const res = await createRfqMutation.mutateAsync({
+        // Create FormData
+        const payloadObject = {
           vendor: {
             ...v.vendor,
             email: v.email,
@@ -117,7 +119,21 @@ export default function RfqVendorTabsModal({
           sendEmail: globalEmail,
           sendWhatsApp: globalWhatsApp,
           items: v.items,
+        };
+
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(payloadObject));
+
+        // Append files
+        v.items.forEach((item) => {
+          if (item.files && item.files.length > 0) {
+            item.files.forEach((file) => {
+              formData.append(`file_${item.itemId}`, file);
+            });
+          }
         });
+
+        const res = await createRfqMutation.mutateAsync(formData);
 
         toast.success(onSuccessMessage(v, res));
 

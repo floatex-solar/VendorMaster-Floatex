@@ -13,7 +13,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendRfqEmail({ to, vendorName, rfqNo, pdfBuffer }) {
+export async function sendRfqEmail({
+  to,
+  vendorName,
+  rfqNo,
+  pdfBuffer,
+  additionalAttachments = [],
+}) {
   const mailOptions = {
     from: `"RFQ System" <${GMAIL_USER}>`,
     to,
@@ -29,6 +35,7 @@ export async function sendRfqEmail({ to, vendorName, rfqNo, pdfBuffer }) {
         content: pdfBuffer, // ✅ CORRECT
         contentType: "application/pdf",
       },
+      ...additionalAttachments,
     ],
   };
 

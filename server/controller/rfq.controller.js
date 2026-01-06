@@ -12,13 +12,24 @@ export async function getRfqsController(req, res) {
 
 export async function createRfqController(req, res) {
   try {
-    const { vendor, items, sendEmail, sendWhatsApp } = req.body;
+    let body = req.body;
+    if (body.data) {
+      try {
+        body = JSON.parse(body.data);
+      } catch (e) {
+        // ignore if not valid json, assume individual fields
+      }
+    }
+
+    const { vendor, items, sendEmail, sendWhatsApp } = body;
+    const files = req.files || [];
 
     const result = await createRfq({
       vendor,
       items,
       sendEmail,
       sendWhatsApp,
+      files,
     });
 
     res.json({ success: true, ...result });

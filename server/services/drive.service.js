@@ -3,14 +3,14 @@ import { Readable } from "stream";
 import { authManager } from "../utils/google-auth-manager.js";
 import appConfig from "../config/app-config.js";
 
-export async function uploadPdfToDrive({ pdfBuffer, fileName }) {
+export async function uploadFileToDrive({ fileBuffer, fileName, mimeType }) {
   const drive = google.drive({
     version: "v3",
     auth: authManager.getAuth(),
   });
 
   const { RFQ_DRIVE_FOLDER_ID } = appConfig;
-  const stream = Readable.from(pdfBuffer);
+  const stream = Readable.from(fileBuffer);
 
   // 1. Upload file
   const res = await drive.files.create({
@@ -18,10 +18,10 @@ export async function uploadPdfToDrive({ pdfBuffer, fileName }) {
     requestBody: {
       name: fileName,
       parents: [RFQ_DRIVE_FOLDER_ID],
-      mimeType: "application/pdf",
+      mimeType: mimeType || "application/pdf",
     },
     media: {
-      mimeType: "application/pdf",
+      mimeType: mimeType || "application/pdf",
       body: stream,
     },
   });

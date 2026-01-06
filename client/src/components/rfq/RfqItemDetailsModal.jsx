@@ -117,6 +117,29 @@ export default function RfqItemDetailsModal({
                     updateItem(idx, "customDescription", e.target.value)
                   }
                 />
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-muted-foreground ml-1">
+                    Specification PDF (Optional)
+                  </label>
+                  <Input
+                    type="file"
+                    multiple
+                    accept="application/pdf"
+                    onChange={(e) =>
+                      updateItem(idx, "files", Array.from(e.target.files))
+                    }
+                  />
+                  {item.files && item.files.length > 0 && (
+                    <div className="flex flex-col gap-0.5 ml-1">
+                      {item.files.map((f, i) => (
+                        <div key={i} className="text-xs text-green-600">
+                          selected: {f.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
