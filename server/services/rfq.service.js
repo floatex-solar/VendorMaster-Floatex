@@ -11,6 +11,17 @@ function now() {
   return new Date().toISOString().replace("T", " ").split(".")[0];
 }
 
+function replacePlaceholders(template, data) {
+  if (!template) return "";
+  let result = template;
+  Object.keys(data).forEach((key) => {
+    // Replace {{key}} case-insensitive or exact. Stick to exact for now.
+    const regex = new RegExp(`{{${key}}}`, "g");
+    result = result.replace(regex, data[key] || "");
+  });
+  return result;
+}
+
 export async function getRfqs() {
   const rows = await getValues(RFQ_SHEET);
 
@@ -35,6 +46,8 @@ export async function createRfq({
   items,
   sendEmail,
   sendWhatsApp,
+  emailTemplate,
+  whatsappTemplate,
   files = [],
 }) {
   // 1. Generate RFQ number
@@ -109,6 +122,15 @@ export async function createRfq({
   // 4. Send Email
   if (sendEmail && vendor.email) {
     try {
+      const htmlBody = replacePlaceholders(emailTemplate, {
+        vendorName: vendor.name,
+        rfqNo,
+        pdfUrl,
+        // Email usually doesn't need item specs link string if we attach files,
+        // but let's provide it just in case user put it in template
+        itemSpecifications: itemLinks.join("<br>"),
+      });
+
       await sendRfqEmail({
         to: vendor.email,
         vendorName: vendor.name,
@@ -116,6 +138,7 @@ export async function createRfq({
         pdfUrl,
         pdfBuffer,
         additionalAttachments: itemAttachments,
+        htmlBody,
       });
       emailStatus = "SENT";
     } catch (err) {
@@ -127,13 +150,28 @@ export async function createRfq({
   // // 5. Send WhatsApp
   if (sendWhatsApp && vendor.phone) {
     try {
-      let messageBody = `Dear ${vendor.name},\n\nPlease find RFQ ${rfqNo} at the link below.\n\n${pdfUrl}`;
+      let messageBody = "";
 
-      if (itemLinks.length > 0) {
-        messageBody += `\n\nItem Specifications:\n${itemLinks.join("\n")}`;
+      if (whatsappTemplate) {
+        messageBody = replacePlaceholders(whatsappTemplate, {
+          vendorName: vendor.name,
+          rfqNo,
+          pdfUrl,
+          itemSpecifications:
+            itemLinks.length > 0
+              ? `Item Specifications:\n${itemLinks.join("\n")}`
+              : "",
+        });
+      } else {
+        // Fallback hardcoded
+        messageBody = `Dear ${vendor.name},\n\nPlease find RFQ ${rfqNo} at the link below.\n\n${pdfUrl}`;
+
+        if (itemLinks.length > 0) {
+          messageBody += `\n\nItem Specifications:\n${itemLinks.join("\n")}`;
+        }
+
+        messageBody += `\n\nThank you`;
       }
-
-      messageBody += `\n\nThank you`;
 
       const res = await sendWhatsAppMessage({
         receiverMobileNo: vendor.phone,

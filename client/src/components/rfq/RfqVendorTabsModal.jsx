@@ -8,9 +8,22 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { CheckCircle, CircleAlert, CircleCheckBig, Loader } from "lucide-react";
+import {
+  CheckCircle,
+  CircleAlert,
+  CircleCheckBig,
+  Loader,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import RfqPdfPreviewModal from "./RfqPdfPreviewModal";
 import RfqVendorTab from "./RfqVendorTab";
+import RichTextEditor from "../ui/RichTextEditor";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Tooltip,
   TooltipContent,
@@ -74,6 +87,17 @@ export default function RfqVendorTabsModal({
   const [globalEmail, setGlobalEmail] = useState(true);
 
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  const [emailTemplate, setEmailTemplate] = useState(`
+    <p>Dear {{vendorName}},</p>
+    <p>Please find attached the RFQ {{rfqNo}}.</p>
+    <p>Regards,<br/>Procurement Team</p>
+  `);
+
+  const [whatsappTemplate, setWhatsappTemplate] = useState(
+    `Dear {{vendorName}},\n\nPlease find RFQ {{rfqNo}} at the link below.\n\n{{pdfUrl}}\n\n{{itemSpecifications}}\n\nThank you`
+  );
 
   const createRfqMutation = useCreateRfq();
 
@@ -118,6 +142,8 @@ export default function RfqVendorTabsModal({
           },
           sendEmail: globalEmail,
           sendWhatsApp: globalWhatsApp,
+          emailTemplate,
+          whatsappTemplate,
           items: v.items,
         };
 
@@ -300,6 +326,57 @@ export default function RfqVendorTabsModal({
             )}
           </div>
         </DialogHeader>
+
+        {/* Templates Section */}
+        <Collapsible
+          open={showTemplates}
+          onOpenChange={setShowTemplates}
+          className="border rounded-md mb-4 bg-muted/20"
+        >
+          <CollapsibleTrigger asChild>
+            <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/40 font-medium text-sm">
+              <span>Customize Message Templates</span>
+              {showTemplates ? (
+                <ChevronUp size={16} />
+              ) : (
+                <ChevronDown size={16} />
+              )}
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="p-4 pt-0 space-y-4">
+            <div className="text-xs text-muted-foreground mb-2">
+              Available placeholders:{" "}
+              <code className="bg-muted px-1 rounded">{"{{vendorName}}"}</code>,{" "}
+              <code className="bg-muted px-1 rounded">{"{{rfqNo}}"}</code>,{" "}
+              <code className="bg-muted px-1 rounded">{"{{pdfUrl}}"}</code> (WA
+              only),{" "}
+              <code className="bg-muted px-1 rounded">
+                {"{{itemSpecifications}}"}
+              </code>{" "}
+              (WA only).
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Email Message (HTML)</div>
+                <RichTextEditor
+                  mode="html"
+                  value={emailTemplate}
+                  onChange={setEmailTemplate}
+                  disabled={sendingAll}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm font-medium">WhatsApp Message</div>
+                <RichTextEditor
+                  mode="whatsapp"
+                  value={whatsappTemplate}
+                  onChange={setWhatsappTemplate}
+                  disabled={sendingAll}
+                />
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
         {allRfqsSent && (
           <div className="flex items-center justify-center w-full">

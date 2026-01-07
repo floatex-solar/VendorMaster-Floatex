@@ -21,7 +21,14 @@ export async function createRfqController(req, res) {
       }
     }
 
-    const { vendor, items, sendEmail, sendWhatsApp } = body;
+    const {
+      vendor,
+      items,
+      sendEmail,
+      sendWhatsApp,
+      emailTemplate,
+      whatsappTemplate,
+    } = body;
     const files = req.files || [];
 
     const result = await createRfq({
@@ -29,6 +36,8 @@ export async function createRfqController(req, res) {
       items,
       sendEmail,
       sendWhatsApp,
+      emailTemplate,
+      whatsappTemplate,
       files,
     });
 

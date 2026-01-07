@@ -19,16 +19,19 @@ export async function sendRfqEmail({
   rfqNo,
   pdfBuffer,
   additionalAttachments = [],
+  htmlBody,
 }) {
+  const defaultHtml = `
+      <p>Dear ${vendorName},</p>
+      <p>Please find attached the RFQ.</p>
+      <p>Regards,<br/>Procurement Team</p>
+    `;
+
   const mailOptions = {
     from: `"RFQ System" <${GMAIL_USER}>`,
     to,
     subject: `RFQ ${rfqNo}`,
-    html: `
-      <p>Dear ${vendorName},</p>
-      <p>Please find attached the RFQ.</p>
-      <p>Regards,<br/>Procurement Team</p>
-    `,
+    html: htmlBody || defaultHtml,
     attachments: [
       {
         filename: `${rfqNo}.pdf`,
