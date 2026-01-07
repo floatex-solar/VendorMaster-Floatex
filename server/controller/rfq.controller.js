@@ -28,6 +28,8 @@ export async function createRfqController(req, res) {
       sendWhatsApp,
       emailTemplate,
       whatsappTemplate,
+      cc,
+      bcc,
     } = body;
     const files = req.files || [];
 
@@ -38,6 +40,8 @@ export async function createRfqController(req, res) {
       sendWhatsApp,
       emailTemplate,
       whatsappTemplate,
+      cc,
+      bcc,
       files,
     });
 

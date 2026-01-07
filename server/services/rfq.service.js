@@ -48,6 +48,8 @@ export async function createRfq({
   sendWhatsApp,
   emailTemplate,
   whatsappTemplate,
+  cc,
+  bcc,
   files = [],
 }) {
   // 1. Generate RFQ number
@@ -139,6 +141,8 @@ export async function createRfq({
         pdfBuffer,
         additionalAttachments: itemAttachments,
         htmlBody,
+        cc,
+        bcc,
       });
       emailStatus = "SENT";
     } catch (err) {

@@ -24,6 +24,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import MultiEmailInput from "../ui/MultiEmailInput";
 import {
   Tooltip,
   TooltipContent,
@@ -95,6 +96,9 @@ export default function RfqVendorTabsModal({
     <p>Regards,<br/>Procurement Team</p>
   `);
 
+  const [ccEmails, setCcEmails] = useState([]);
+  const [bccEmails, setBccEmails] = useState([]);
+
   const [whatsappTemplate, setWhatsappTemplate] = useState(
     `Dear {{vendorName}},\n\nPlease find RFQ {{rfqNo}} at the link below.\n\n{{pdfUrl}}\n\n{{itemSpecifications}}\n\nThank you`
   );
@@ -142,8 +146,12 @@ export default function RfqVendorTabsModal({
           },
           sendEmail: globalEmail,
           sendWhatsApp: globalWhatsApp,
+          sendEmail: globalEmail,
+          sendWhatsApp: globalWhatsApp,
           emailTemplate,
           whatsappTemplate,
+          cc: ccEmails,
+          bcc: bccEmails,
           items: v.items,
         };
 
@@ -335,7 +343,7 @@ export default function RfqVendorTabsModal({
         >
           <CollapsibleTrigger asChild>
             <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/40 font-medium text-sm">
-              <span>Customize Message Templates</span>
+              <span>Customize Message Templates & CC, BCC</span>
               {showTemplates ? (
                 <ChevronUp size={16} />
               ) : (
@@ -356,14 +364,33 @@ export default function RfqVendorTabsModal({
               (WA only).
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="text-sm font-medium">Email Message (HTML)</div>
-                <RichTextEditor
-                  mode="html"
-                  value={emailTemplate}
-                  onChange={setEmailTemplate}
-                  disabled={sendingAll}
-                />
+              <div className="space-y-4">
+                {/* Email Inputs */}
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">
+                    Email Message (HTML)
+                  </div>
+                  <div className="grid gap-2">
+                    <MultiEmailInput
+                      placeholder="CC (Press Enter to add)"
+                      value={ccEmails}
+                      onChange={setCcEmails}
+                      disabled={sendingAll}
+                    />
+                    <MultiEmailInput
+                      placeholder="BCC (Press Enter to add)"
+                      value={bccEmails}
+                      onChange={setBccEmails}
+                      disabled={sendingAll}
+                    />
+                  </div>
+                  <RichTextEditor
+                    mode="html"
+                    value={emailTemplate}
+                    onChange={setEmailTemplate}
+                    disabled={sendingAll}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">WhatsApp Message</div>

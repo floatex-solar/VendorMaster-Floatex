@@ -20,6 +20,8 @@ export async function sendRfqEmail({
   pdfBuffer,
   additionalAttachments = [],
   htmlBody,
+  cc,
+  bcc,
 }) {
   const defaultHtml = `
       <p>Dear ${vendorName},</p>
@@ -30,6 +32,8 @@ export async function sendRfqEmail({
   const mailOptions = {
     from: `"RFQ System" <${GMAIL_USER}>`,
     to,
+    cc,
+    bcc,
     subject: `RFQ ${rfqNo}`,
     html: htmlBody || defaultHtml,
     attachments: [
