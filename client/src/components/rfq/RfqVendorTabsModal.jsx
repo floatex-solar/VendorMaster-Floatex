@@ -86,7 +86,7 @@ export default function RfqVendorTabsModal({
 
   const [sendingAll, setSendingAll] = useState(false);
 
-  const [globalWhatsApp, setGlobalWhatsApp] = useState(true);
+  const [globalWhatsApp, setGlobalWhatsApp] = useState(false);
   const [globalEmail, setGlobalEmail] = useState(true);
 
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -439,6 +439,7 @@ export default function RfqVendorTabsModal({
                       onClick={() => handleSaveDefault("EMAIL", emailTemplate)}
                       size="sm"
                       className="bg-yellow-400 text-xs h-fit py-1 hover:bg-yellow-500 text-white"
+                      disabled={sendingAll}
                     >
                       <Save /> Use This Template From Now On
                     </Button>
@@ -460,6 +461,7 @@ export default function RfqVendorTabsModal({
                     }
                     size="sm"
                     className="bg-yellow-400 text-xs h-fit py-1 hover:bg-indigo-700 text-white"
+                    disabled={sendingAll}
                   >
                     <Save /> Use This Template From Now On
                   </Button>
