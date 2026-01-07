@@ -28,7 +28,9 @@ export function useRfqs() {
     queryKey: ["rfqs"],
     queryFn: async () => {
       const res = await api.get("/rfqs");
-      return res.data;
+      return res.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
     },
     staleTime: 5000,
   });
