@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useRfqTemplates, useSaveRfqTemplate } from "../../hooks/useRfq.js";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -15,6 +16,7 @@ import {
   Loader,
   ChevronDown,
   ChevronUp,
+  Save,
 } from "lucide-react";
 import RfqPdfPreviewModal from "./RfqPdfPreviewModal";
 import RfqVendorTab from "./RfqVendorTab";
@@ -121,6 +123,48 @@ export default function RfqVendorTabsModal({
       setActiveTab(String(baseVendors[0].vendor.vendorId));
     }
   }, [open, baseVendors]);
+
+  const { data: templates } = useRfqTemplates(open);
+
+  useEffect(() => {
+    if (!open) return;
+
+    setVendors(
+      baseVendors.map((v) => ({
+        ...v,
+        email: normalizeValue(v.vendor.email),
+        phone: normalizeValue(v.vendor.phone),
+        selectedContactIndex: null,
+      }))
+    );
+
+    if (baseVendors.length > 0) {
+      setActiveTab(String(baseVendors[0].vendor.vendorId));
+    }
+
+    if (templates) {
+      if (templates.email) setEmailTemplate(templates.email);
+      if (templates.whatsapp) setWhatsappTemplate(templates.whatsapp);
+    }
+  }, [open, baseVendors, templates]);
+
+  // Replace handleSaveDefault with this:
+  const saveTemplateMutation = useSaveRfqTemplate();
+
+  const handleSaveDefault = (type, content) => {
+    saveTemplateMutation.mutate(
+      { type, content },
+      {
+        onSuccess: () => {
+          toast.success("Default template updated successfully!");
+        },
+        onError: (error) => {
+          console.error("Failed to save template", error);
+          toast.error("Failed to update default template.");
+        },
+      }
+    );
+  };
 
   async function processRfqBatch({
     shouldProcess,
@@ -390,6 +434,15 @@ export default function RfqVendorTabsModal({
                     onChange={setEmailTemplate}
                     disabled={sendingAll}
                   />
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={() => handleSaveDefault("EMAIL", emailTemplate)}
+                      size="sm"
+                      className="bg-yellow-400 text-xs h-fit py-1 hover:bg-yellow-500 text-white"
+                    >
+                      <Save /> Use This Template From Now On
+                    </Button>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -400,6 +453,17 @@ export default function RfqVendorTabsModal({
                   onChange={setWhatsappTemplate}
                   disabled={sendingAll}
                 />
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() =>
+                      handleSaveDefault("WHATSAPP", whatsappTemplate)
+                    }
+                    size="sm"
+                    className="bg-yellow-400 text-xs h-fit py-1 hover:bg-indigo-700 text-white"
+                  >
+                    <Save /> Use This Template From Now On
+                  </Button>
+                </div>
               </div>
             </div>
           </CollapsibleContent>

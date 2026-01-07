@@ -33,3 +33,35 @@ export function useRfqs() {
     staleTime: 5000,
   });
 }
+
+/* -----------------------------------------
+   GET RFQ TEMPLATES
+----------------------------------------- */
+export function useRfqTemplates(enabled = true) {
+  return useQuery({
+    queryKey: ["rfqTemplates"],
+    queryFn: async () => {
+      const res = await api.get("/rfqs/templates");
+      return res.data; // { email, whatsapp }
+    },
+    enabled,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+/* -----------------------------------------
+   SAVE RFQ TEMPLATE
+----------------------------------------- */
+export function useSaveRfqTemplate() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ type, content }) => {
+      const res = await api.post("/rfqs/templates", { type, content });
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["rfqTemplates"] });
+    },
+  });
+}

@@ -1,4 +1,5 @@
 import { createRfq, getRfqs } from "../services/rfq.service.js";
+import { getTemplates, saveTemplate } from "../services/templates.service.js";
 import { generateRfqPdfBuffer } from "../services/rfqPdf.service.js";
 
 export async function getRfqsController(req, res) {
@@ -69,5 +70,29 @@ export async function previewRfqPdfController(req, res) {
   } catch (err) {
     console.error("Preview PDF error:", err);
     res.status(500).json({ message: err.message });
+  }
+}
+
+export async function getTemplatesController(req, res) {
+  try {
+    const templates = await getTemplates();
+    res.json(templates);
+  } catch (err) {
+    console.error("Error getting templates:", err);
+    res.status(500).json({ message: "Failed to fetch templates" });
+  }
+}
+
+export async function saveTemplateController(req, res) {
+  try {
+    const { type, content } = req.body;
+    if (!type || content === undefined) {
+      return res.status(400).json({ message: "Type and content are required" });
+    }
+    await saveTemplate(type, content);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error saving template:", err);
+    res.status(500).json({ message: "Failed to save template" });
   }
 }
