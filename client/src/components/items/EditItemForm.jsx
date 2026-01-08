@@ -115,13 +115,13 @@ export default function EditItemForm({ open, setOpen, item }) {
       subCategoryId: String(item.subCategoryId),
       description: item.description,
       uomId: String(item.uomId),
-      mappings: initialMappings.map((m) => ({
-        mappingId: m.mappingId,
-        vendorId: String(m.vendorId || ""),
-        price: m.price || "",
-        uom: m.uom || "",
-        leadTimeDays: m.leadTimeDays || "",
-        notes: m.notes || "",
+      mappings: initialMappings.vendors?.map((m) => ({
+        mappingId: m.mapping.mappingId,
+        vendorId: String(m.mapping.vendorId || ""),
+        price: m.mapping.price || "",
+        uom: m.mapping.uom || "",
+        leadTimeDays: m.mapping.leadTimeDays || "",
+        notes: m.mapping.notes || "",
         deleted: false,
       })),
     });
@@ -214,8 +214,8 @@ export default function EditItemForm({ open, setOpen, item }) {
   // ---------------------
   const buildPayload = () => {
     return watch("mappings").map((m) => {
-      const original = initialMappings?.find(
-        (o) => o.mappingId === m.mappingId
+      const original = initialMappings.vendors?.find(
+        (o) => o.mapping.mappingId === m.mappingId
       );
 
       console.log(!m.mappingId && !m.deleted);
